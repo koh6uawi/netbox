@@ -306,7 +306,7 @@ class SiteView(generic.ObjectView):
 
         return {
             'stats': stats,
-            'locations': locations,
+            'locations': locations.filter(level=0),
         }
 
 
@@ -369,6 +369,8 @@ class LocationView(generic.ObjectView):
         rack_count = Rack.objects.filter(location__in=location_ids).count()
         device_count = Device.objects.filter(location__in=location_ids).count()
 
+        direct_children = instance.get_children().values_list('pk', flat=True)
+
         child_locations = Location.objects.add_related_count(
             Location.objects.add_related_count(
                 Location.objects.all(),
@@ -381,7 +383,7 @@ class LocationView(generic.ObjectView):
             'location',
             'rack_count',
             cumulative=True
-        ).filter(pk__in=location_ids).exclude(pk=instance.pk)
+        ).filter(pk__in=direct_children)
         child_locations_table = tables.LocationTable(child_locations)
         paginate_table(child_locations_table, request)
 
