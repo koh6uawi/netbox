@@ -369,8 +369,6 @@ class LocationView(generic.ObjectView):
         rack_count = Rack.objects.filter(location__in=location_ids).count()
         device_count = Device.objects.filter(location__in=location_ids).count()
 
-        direct_children = instance.get_children().values_list('pk', flat=True)
-
         child_locations = Location.objects.add_related_count(
             Location.objects.add_related_count(
                 Location.objects.all(),
@@ -383,7 +381,7 @@ class LocationView(generic.ObjectView):
             'location',
             'rack_count',
             cumulative=True
-        ).filter(pk__in=direct_children)
+        ).filter(parent=instance)
         child_locations_table = tables.LocationTable(child_locations)
         paginate_table(child_locations_table, request)
 
